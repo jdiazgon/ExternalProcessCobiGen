@@ -1,0 +1,44 @@
+openapi: 3.0.0
+servers:
+  - url: 'https://localhost:5000/'
+    description: Nodejs server
+info:
+  title: External process communication
+  description: Specification of communication between external process and CobiGen
+  version: 1.0.0
+  x-rootpackage: com.devonfw.poc
+paths:
+  /processmanagement/parsefile/{filePath}:
+    get:
+      operationId: parseFile
+      parameters:
+        - name: filePath
+          in: path
+          description: path of file to parse
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns data model in JSON format
+        '404':
+          description: Not found
+components:
+    schemas:
+        Field:
+          x-component: processmanagement
+          description: Field
+          type: object
+          properties:
+            fieldName:
+                type: string
+            fieldType:
+                type: string
+        Import:
+          x-component: processmanagement
+          description: Field
+          type: object
+          properties:
+            importValue:
+                type: string
+ 

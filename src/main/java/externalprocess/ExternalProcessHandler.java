@@ -1,6 +1,7 @@
 package externalprocess;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -39,9 +40,20 @@ public class ExternalProcessHandler {
   public boolean ExecutinExe(String path) {
 
     boolean execution;
+    InputStream inputstream = null;
     try {
       System.out.println("Loading server: " + path);
       this.process = new ProcessBuilder(path, String.valueOf(this.port)).start();
+      // We try to get the error output
+      inputstream = this.process.getErrorStream();
+      int data = inputstream.read();
+      if (data >= 0) {
+        // if it has data, then an error raised. Let's try to change port
+        closeConnection();
+        this.port++;
+        ExecutinExe(ProcessConstants.exePath);
+      }
+
       if (!this.process.isAlive()) {
         while (!this.process.isAlive()) {
           System.out.println("Waiting process is alive");
@@ -51,8 +63,11 @@ public class ExternalProcessHandler {
     } catch (IOException e) {
       e.printStackTrace();
       execution = false;
+    } finally {
+
     }
     return execution;
+
   }
 
   public boolean InitializeConnection() {
@@ -117,7 +132,8 @@ public class ExternalProcessHandler {
 
   public void closeConnection() {
 
-    this.conn.disconnect();
+    if (this.conn != null)
+      this.conn.disconnect();
     if (this.process.isAlive()) {
       this.process.destroy();
       System.out.println("Closing server");

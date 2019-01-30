@@ -1,6 +1,7 @@
 package externalprocess;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,21 +35,42 @@ public class ExternalProcessHandler {
 
   public boolean InitializeConnection() {
 
-    try {
-      URL url = new URL("http://" + this.hostName + ":" + this.port + "/processmanagement/");
-      this.conn = (HttpURLConnection) url.openConnection();
+    boolean connection = false;
+    int retry = 0;
+    while (!connection && retry < 10) {
+      try {
+        URL url = new URL("http://" + this.hostName + ":" + this.port + "/processmanagement/");
+        this.conn = (HttpURLConnection) url.openConnection();
+        connection = true;
+      } catch (ConnectException e) {
+        e.printStackTrace();
+        retry++;
+        System.out.println("Connection to server failed, attempt number " + retry + ".");
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException eS) {
+          // TODO Auto-generated catch block
+          eS.printStackTrace();
+        }
+      } catch (MalformedURLException e) {
+        System.out.println("Connection to server failed, MalformedURL.");
+        e.printStackTrace();
+        return false;
 
-    } catch (MalformedURLException e) {
-
-      e.printStackTrace();
-      return false;
-
-    } catch (IOException e) {
-
-      e.printStackTrace();
-      return false;
+      } catch (IOException e) {
+        e.printStackTrace();
+        System.out.println("Connection to server failed, attempt number " + retry + ".");
+        connection = false;
+        retry++;
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException eS) {
+          // TODO Auto-generated catch block
+          eS.printStackTrace();
+        }
+      }
     }
-    return true;
+    return connection;
   }
 
   public HttpURLConnection getConnection() {
@@ -70,21 +92,12 @@ public class ExternalProcessHandler {
     boolean execution;
     try {
       System.out.println("Loading server: " + path);
-      // Runtime runtime = Runtime.getRuntime();
       this.process = new ProcessBuilder(path, String.valueOf(this.port)).start();
-      // ArrayList<String> server = new ArrayList();
-      // server.add("path");
-      // server.add("5200");
-      // this.process = runtime.exec(path, "5200");
-      /*
-       * InputStream processInputStream = process.getInputStream(); BufferedReader reader = new BufferedReader(new
-       * InputStreamReader(processInputStream)); String line; while ((line = reader.readLine()) != null) {
-       * System.out.println(line); }
-       */
-      /*
-       * if (process.exitValue() == 0) { System.out.println("Salida correcta"); execution = true; } else {
-       * System.out.println("Salida falsa"); execution = false; }
-       */
+      if (!this.process.isAlive()) {
+        while (!this.process.isAlive()) {
+          System.out.println("Waiting process is alive");
+        }
+      }
       execution = true;
     } catch (IOException e) {
       // TODO Auto-generated catch block

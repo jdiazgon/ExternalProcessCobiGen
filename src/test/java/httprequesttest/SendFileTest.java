@@ -22,9 +22,10 @@ public class SendFileTest {
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.ExecutinExe("C:\\Devops\\COBIGEN\\nestserver\\nestserver-win.exe"), true);
-    // assertEquals(request.ExecutinExe("C:\\Program Files\\Notepad++\\notepad++.exe"), true);
+    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+
     assertEquals(request.InitializeConnection(), true);
+    assertEquals(inputReader.isValidInput(inputFile), true);
     assertEquals(inputReader.isValidInput(inputFile), true);
     request.closeConnection();
   }

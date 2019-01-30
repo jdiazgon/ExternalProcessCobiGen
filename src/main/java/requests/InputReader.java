@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 
 import externalprocess.ExternalProcessHandler;
@@ -21,12 +22,8 @@ public class InputReader {
    */
   public boolean isValidInput(InputFile inputFile) {
 
-    HttpURLConnection conn = this.request.getConnection();
+    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json");
     try {
-      conn.setDoOutput(true);
-      conn.setRequestMethod("POST");
-      conn.setRequestProperty("Content-Type", "application/json");
-
       OutputStream os = conn.getOutputStream();
       OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
       osw.write(inputFile.toJSON());
@@ -45,11 +42,21 @@ public class InputReader {
       System.out.println("Output from Server .... \n");
       while ((output = br.readLine()) != null) {
         System.out.println(output);
-        conn.disconnect();
         return output.equals("true");
       }
+
+    } catch (ConnectException e) {
+
+      System.out.println("Connection to server failed, attempt number " + 0 + ".");
+      e.printStackTrace();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
+
+      e.printStackTrace();
+    } catch (IllegalStateException e) {
+
+      System.out.println("Closing connection on InputReader.");
+      System.out.println(e);
+      this.request.closeConnection();
       e.printStackTrace();
     }
     return false;

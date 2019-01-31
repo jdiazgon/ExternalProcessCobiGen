@@ -1,12 +1,13 @@
 package externalprocess;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+
+import externalprocess.utils.OutputHandler;
 
 public class ExternalProcessHandler {
 
@@ -18,7 +19,11 @@ public class ExternalProcessHandler {
 
   private Process process;
 
+  private OutputHandler err = null;
+
   private URL url;
+
+  private String exePath = "";
 
   public static ExternalProcessHandler externalProcessHandler = null;
 
@@ -39,32 +44,23 @@ public class ExternalProcessHandler {
 
   public boolean ExecutinExe(String path) {
 
-    boolean execution;
-    InputStream inputstream = null;
-    try {
-      System.out.println("Loading server: " + path);
-      this.process = new ProcessBuilder(path, String.valueOf(this.port)).start();
-      // We try to get the error output
-      inputstream = this.process.getErrorStream();
-      int data = inputstream.read();
-      if (data >= 0) {
-        // if it has data, then an error raised. Let's try to change port
-        closeConnection();
-        this.port++;
-        ExecutinExe(ProcessConstants.exePath);
-      }
+    this.exePath = path;
 
-      if (!this.process.isAlive()) {
-        while (!this.process.isAlive()) {
-          System.out.println("Waiting process is alive");
-        }
+    boolean execution = false;
+    try {
+      System.out.println("Loading server: " + this.exePath);
+      this.process = new ProcessBuilder(this.exePath, String.valueOf(this.port)).start();
+
+      // We try to get the error output
+      this.err = new OutputHandler(this.process.getErrorStream(), "UTF-8");
+
+      while (!this.process.isAlive()) {
+        System.out.println("Waiting process is alive");
       }
       execution = true;
     } catch (IOException e) {
       e.printStackTrace();
       execution = false;
-    } finally {
-
     }
     return execution;
 
@@ -76,9 +72,18 @@ public class ExternalProcessHandler {
     int retry = 0;
     while (!isConnected && retry < 10) {
       try {
-        this.url = new URL("http://" + this.hostName + ":" + this.port + "/processmanagement/");
-        this.conn = (HttpURLConnection) this.url.openConnection();
-        this.conn.connect();
+        startConnection();
+
+        // Just check correct port acquisition
+        while (acquirePort() == false)
+          if (retry <= 5) {
+            retry++;
+            startConnection();
+            continue;
+          } else {
+            return false;
+          }
+
       } catch (ConnectException e) {
         retry++;
         System.out.println("Connection to server failed, attempt number " + retry + ".");
@@ -111,6 +116,59 @@ public class ExternalProcessHandler {
     return isConnected;
   }
 
+  /**
+   * @throws MalformedURLException
+   * @throws IOException
+   */
+  private void startConnection() throws MalformedURLException, IOException {
+
+    this.url = new URL("http://" + this.hostName + ":" + this.port + "/processmanagement/");
+    this.conn = (HttpURLConnection) this.url.openConnection();
+    this.conn.connect();
+  }
+
+  public boolean acquirePort() {
+
+    // If there is any error, probably it is because the port is blocked
+    if (processHasErrors() || isNotConnected()) {
+      closeConnection();
+      this.port++;
+      ExecutinExe(this.exePath);
+    } else {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean processHasErrors() {
+
+    if (this.err != null) {
+      // External process has not printed any error
+      if (this.err.getText().isEmpty()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public boolean isNotConnected() {
+
+    try {
+      getConnection("HEAD", "Content-Type", "text/plain");
+      int responseCode;
+      responseCode = this.conn.getResponseCode();
+      if (responseCode < 500) {
+        return false;
+      }
+    } catch (IOException e) {
+      System.out.println("Connection to server failed, port blocked. Trying other port...");
+      System.out.println(e);
+    }
+
+    return true;
+  }
+
   public HttpURLConnection getConnection(String httpMethod, String headerType, String mediaType) {
 
     try {
@@ -132,11 +190,12 @@ public class ExternalProcessHandler {
 
   public void closeConnection() {
 
-    if (this.conn != null)
+    if (this.conn != null) {
       this.conn.disconnect();
+    }
     if (this.process.isAlive()) {
       this.process.destroy();
-      System.out.println("Closing server");
+      System.out.println("Closing process");
     }
   }
 

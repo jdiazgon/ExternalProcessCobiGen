@@ -26,6 +26,21 @@ public class SendFileTest {
 
     assertEquals(request.InitializeConnection(), true);
     assertEquals(inputReader.isValidInput(inputFile), true);
+    request.closeConnection();
+  }
+
+  @Test
+  public void checkPortIsBlocked() {
+
+    // Port 80 is always blocked, so let's try to check what happens
+    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName, 80);
+    InputReader inputReader = new InputReader();
+    String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
+    InputFile inputFile = new InputFile(filePath);
+
+    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+
+    assertEquals(request.InitializeConnection(), true);
     assertEquals(inputReader.isValidInput(inputFile), true);
     request.closeConnection();
   }

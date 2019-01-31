@@ -19,7 +19,7 @@ public class ExternalProcessHandler {
 
   private Process process;
 
-  private OutputHandler err = null;
+  private OutputHandler errorHandler = null;
 
   private URL url;
 
@@ -52,7 +52,7 @@ public class ExternalProcessHandler {
       this.process = new ProcessBuilder(this.exePath, String.valueOf(this.port)).start();
 
       // We try to get the error output
-      this.err = new OutputHandler(this.process.getErrorStream(), "UTF-8");
+      this.errorHandler = new OutputHandler(this.process.getErrorStream(), "UTF-8");
 
       while (!this.process.isAlive()) {
         System.out.println("Waiting process is alive");
@@ -142,9 +142,9 @@ public class ExternalProcessHandler {
 
   public boolean processHasErrors() {
 
-    if (this.err != null) {
+    if (this.errorHandler != null) {
       // External process has not printed any error
-      if (this.err.getText().isEmpty()) {
+      if (this.errorHandler.getText().isEmpty()) {
         return false;
       }
     }
@@ -196,6 +196,14 @@ public class ExternalProcessHandler {
     if (this.process.isAlive()) {
       this.process.destroy();
       System.out.println("Closing process");
+    }
+    // Let's kill the process error handler
+    if (this.errorHandler.isAlive()) {
+      try {
+        this.errorHandler.join();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
   }
 

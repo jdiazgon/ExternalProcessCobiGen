@@ -130,7 +130,8 @@ public class ExternalProcessHandler {
   public boolean acquirePort() {
 
     // If there is any error, probably it is because the port is blocked
-    if (processHasErrors() || isNotConnected()) {
+    // dev processHasErrors() ||
+    if (isNotConnected()) {
       closeConnection();
       this.port++;
       ExecutinExe(this.exePath);
@@ -155,7 +156,7 @@ public class ExternalProcessHandler {
   public boolean isNotConnected() {
 
     try {
-      getConnection("HEAD", "Content-Type", "text/plain");
+      getConnection("HEAD", "Content-Type", "text/plain", "");
       int responseCode;
       responseCode = this.conn.getResponseCode();
       if (responseCode < 500) {
@@ -169,10 +170,12 @@ public class ExternalProcessHandler {
     return true;
   }
 
-  public HttpURLConnection getConnection(String httpMethod, String headerType, String mediaType) {
+  public HttpURLConnection getConnection(String httpMethod, String headerType, String mediaType, String serviceURL) {
 
     try {
-      this.conn = (HttpURLConnection) this.url.openConnection();
+      URL currentURL = new URL(this.url.getProtocol(), this.url.getHost(), this.url.getPort(),
+          this.url.getFile() + serviceURL);
+      this.conn = (HttpURLConnection) currentURL.openConnection();
 
       this.conn.setDoOutput(true);
       this.conn.setRequestMethod(httpMethod);

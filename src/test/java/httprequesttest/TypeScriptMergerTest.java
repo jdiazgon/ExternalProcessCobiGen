@@ -47,7 +47,7 @@ public class TypeScriptMergerTest {
     // String regex = " * Should format correctly this line";
 
     // act
-    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, patchFile.getAbsolutePath(), "UTF-8");
+    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
 
     assertThat(mergedContents).contains("bProperty");
     assertThat(mergedContents).contains("aProperty: number = 2");
@@ -89,11 +89,12 @@ public class TypeScriptMergerTest {
     ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
         ProcessConstants.port);
 
-    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    // assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
     assertEquals(request.InitializeConnection(), true);
 
     // arrange
     File baseFile = new File(testFileRootPath + "baseFile.ts");
+    File patchFile = new File(testFileRootPath + "baseFile.ts");
 
     // act
     String mergedContents = new NodeMerger("tsmerge", true).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");

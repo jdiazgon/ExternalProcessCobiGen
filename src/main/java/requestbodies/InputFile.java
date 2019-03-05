@@ -1,5 +1,7 @@
 package requestbodies;
 
+import java.io.File;
+
 public class InputFile {
   String path;
 
@@ -13,7 +15,9 @@ public class InputFile {
    */
   public String getPath() {
 
-    return this.path;
+    String escapedSeparator = File.separator + File.separator;
+
+    return this.path.replaceAll(escapedSeparator, escapedSeparator + escapedSeparator);
   }
 
   /**

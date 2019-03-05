@@ -22,7 +22,7 @@ public class InputReader {
    */
   public boolean isValidInput(InputFile inputFile) {
 
-    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json");
+    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json", "isValidInput");
     try {
       OutputStream os = conn.getOutputStream();
       OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");

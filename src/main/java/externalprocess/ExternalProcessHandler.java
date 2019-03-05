@@ -120,7 +120,7 @@ public class ExternalProcessHandler {
    * @throws MalformedURLException
    * @throws IOException
    */
-  private void startConnection() throws MalformedURLException, IOException {
+  private void startConnection() throws IOException {
 
     this.url = new URL("http://" + this.hostName + ":" + this.port + "/processmanagement/");
     this.conn = (HttpURLConnection) this.url.openConnection();

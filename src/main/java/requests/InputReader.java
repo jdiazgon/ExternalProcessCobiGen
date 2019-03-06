@@ -9,7 +9,7 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
+import externalprocess.constants.ProcessConstants;
 import requestbodies.InputFile;
 
 public class InputReader {

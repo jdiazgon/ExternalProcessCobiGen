@@ -17,7 +17,7 @@ import org.codehaus.jackson.map.ObjectWriter;
 import com.devonfw.cobigen.api.exception.MergeException;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
+import externalprocess.constants.ProcessConstants;
 import requestbodies.MergeTO;
 
 /**
@@ -74,9 +74,7 @@ public class NodeMerger {
     HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json", "merge");
     // Used for sending serialized objects
     ObjectWriter objWriter;
-    try {
-      OutputStream os = conn.getOutputStream();
-      OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+    try (OutputStream os = conn.getOutputStream(); OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");) {
 
       objWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
       String jsonMergerTO = objWriter.writeValueAsString(mergeTO);
@@ -95,12 +93,20 @@ public class NodeMerger {
 
       BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-      String output;
+      String output = "";
+      String mergedContents = "";
       System.out.println("Output from Server .... \n");
-      while ((output = br.readLine()) != null) {
+      Boolean moreOutput = true;
+      Integer lineIteration = 0;
+      while ((output = br.readLine()) != null && moreOutput) {
         System.out.println(output);
-        return output;
+        mergedContents = mergedContents + "\n" + output;
+        lineIteration += 1;
+        if (lineIteration > 50) {
+          moreOutput = false;
+        }
       }
+      return mergedContents;
 
     } catch (ConnectException e) {
 

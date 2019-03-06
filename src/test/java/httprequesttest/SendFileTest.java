@@ -7,7 +7,7 @@ import java.io.File;
 import org.junit.Test;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
+import externalprocess.constants.ProcessConstants;
 import requestbodies.InputFile;
 import requests.InputReader;
 
@@ -38,7 +38,7 @@ public class SendFileTest {
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    assertEquals(request.executingExe(ProcessConstants.exePath), true);
 
     assertEquals(request.InitializeConnection(), true);
     assertEquals(inputReader.isValidInput(inputFile), true);

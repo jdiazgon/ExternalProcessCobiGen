@@ -7,15 +7,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import com.devonfw.cobigen.api.exception.MergeException;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
+import externalprocess.constants.ProcessConstants;
 import requests.NodeMerger;
 
 /**
@@ -26,6 +28,10 @@ public class TypeScriptMergerTest {
   /** Test resources root path */
   private static String testFileRootPath = "src/test/resources/testdata/unittest/merger/";
 
+  /** Initializing connection with server */
+  private static ExternalProcessHandler request = ExternalProcessHandler
+      .getExternalProcessHandler(ProcessConstants.hostName, ProcessConstants.port);
+
   /**
    * Checks if the ts-merger can be launched and if the iutput is correct with patchOverrides = false
    *
@@ -34,15 +40,12 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingNoOverrides() {
 
-    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-        ProcessConstants.port);
-
-    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
-    assertEquals(request.InitializeConnection(), true);
+    assertEquals(true, request.executingExe(ProcessConstants.exePath));
+    assertEquals(true, request.InitializeConnection());
 
     // arrange
     File baseFile = new File(testFileRootPath + "baseFile.ts");
-    File patchFile = new File(testFileRootPath + "baseFile.ts");
+
     // Next version should merge comments
     // String regex = " * Should format correctly this line";
 
@@ -86,15 +89,11 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingOverrides() {
 
-    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-        ProcessConstants.port);
-
     // assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
-    assertEquals(request.InitializeConnection(), true);
+    assertEquals(true, request.InitializeConnection());
 
     // arrange
     File baseFile = new File(testFileRootPath + "baseFile.ts");
-    File patchFile = new File(testFileRootPath + "baseFile.ts");
 
     // act
     String mergedContents = new NodeMerger("tsmerge", true).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
@@ -126,7 +125,51 @@ public class TypeScriptMergerTest {
     assertThat(mergedContents).contains("private b: string;");
     // Next version should merge comments
     // assertThat(mergedContents).contains("// Should contain this comment");
-    request.closeConnection();
+    // request.closeConnection();
+  }
+
+  /**
+   * We need to test whether we are able to send large amount of data to the server.
+   *
+   * @test fails
+   */
+  @Test
+  public void testMergingMassiveFile() {
+
+    // assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    assertEquals(true, request.InitializeConnection());
+
+    // arrange
+    File baseFile = new File(testFileRootPath + "massiveFile.ts");
+
+    // act
+    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
+
+    assertEquals(false, mergedContents.isEmpty());
+
+  }
+
+  /**
+   * Creates a massive ts file
+   *
+   * @param fileName
+   * @return Massive string
+   * @throws FileNotFoundException
+   */
+  private String createMassiveFile(String fileName) throws FileNotFoundException {
+
+    String massiveString = readTSFile(fileName);
+    String generatedText = massiveString;
+
+    for (int i = 0; i < 35000; i++) {
+      String appendThis = generatedText.replaceAll("class a ", "class a" + i).replaceAll("interface a ",
+          "interface a" + i);
+      massiveString = massiveString + "\n" + appendThis;
+    }
+    try (PrintWriter out = new PrintWriter("massiveFile.txt")) {
+      out.println(massiveString);
+    }
+    return massiveString;
   }
 
   /**
@@ -140,7 +183,12 @@ public class TypeScriptMergerTest {
 
     File baseFile = new File(testFileRootPath + "baseFile_encoding_UTF-8.ts");
     File patchFile = new File(testFileRootPath + "patchFile.ts");
-    String mergedContents = "";
+
+    assertEquals(true, request.InitializeConnection());
+
+    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, FileUtils.readFileToString(patchFile),
+        "UTF-8");
+
     assertThat(mergedContents.contains("Ñ")).isTrue();
 
     baseFile = new File(testFileRootPath + "baseFile_encoding_ISO-8859-1.ts");

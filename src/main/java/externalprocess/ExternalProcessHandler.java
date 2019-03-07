@@ -100,46 +100,38 @@ public class ExternalProcessHandler {
    */
   public boolean InitializeConnection() {
 
+    ConnectionExceptionHandler connectionExc = new ConnectionExceptionHandler();
+    connectionExc.setMalformedURLExceptionMessage("Connection to server failed, MalformedURL.");
+
     boolean isConnected = false;
     int retry = 0;
     while (!isConnected && retry < 10) {
       try {
+        connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number " + (retry + 1) + ".");
+        connectionExc.setIOExceptionMessage("Connection to server failed, attempt number " + (retry + 1) + ".");
+        retry++;
+
         startConnection();
 
         // Just check correct port acquisition
-        while (acquirePort() == false)
+        while (!acquirePort())
           if (retry <= 5) {
             retry++;
             startConnection();
-            continue;
           } else {
             return false;
           }
 
       } catch (ConnectException e) {
-        retry++;
-        System.out.println("Connection to server failed, attempt number " + retry + ".");
-        System.out.println(e);
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException eS) {
-          eS.printStackTrace();
-        }
+          connectionExc.handle(e);
+
       } catch (MalformedURLException e) {
-        System.out.println("Connection to server failed, MalformedURL.");
-        e.printStackTrace();
-        return false;
+          connectionExc.handle(e);
+          return false;
 
       } catch (IOException e) {
-        retry++;
-        System.out.println("Connection to server failed, attempt number " + retry + ".");
-        System.out.println(e);
-        isConnected = false;
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException eS) {
-          eS.printStackTrace();
-        }
+          connectionExc.handle(e);
+
       } finally {
         this.conn.disconnect();
         isConnected = true;

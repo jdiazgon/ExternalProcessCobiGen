@@ -40,7 +40,7 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingNoOverrides() {
 
-    assertEquals(true, request.executingExe(ProcessConstants.exePath));
+    // assertEquals(true, request.executingExe(ProcessConstants.exePath));
     assertEquals(true, request.InitializeConnection());
 
     // arrange
@@ -78,7 +78,7 @@ public class TypeScriptMergerTest {
     assertThat(mergedContents).contains("private b: number;");
     // assertThat(mergedContents).containsPattern(regex);
 
-    request.closeConnection();
+    // request.closeConnection();
   }
 
   /**

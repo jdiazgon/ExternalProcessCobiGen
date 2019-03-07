@@ -67,21 +67,17 @@ public class ConnectionExceptionHandler {
 	}
 
 
-	public List<ConnectionException> handle(Exception e) {
-
-	  List<ConnectionException> exceptions = new LinkedList<ConnectionException>();
+	public ConnectionException handle(Exception e) {
 
 	  boolean isConnectException = e instanceof ConnectException;
 	  boolean isIOException = e instanceof IOException;
 
 	  if (isConnectException) {
 	    System.out.println(this.connectExceptionMessage);
-	    exceptions.add(ConnectionException.CONNECT);
 	  }
 
 	  if (isIOException) {
       System.out.println(this.ioExceptionMessage);
-      exceptions.add(ConnectionException.IO);
     }
 
 	  if (isConnectException || isIOException) {
@@ -90,21 +86,27 @@ public class ConnectionExceptionHandler {
 	    } catch (InterruptedException eS) {
 	      eS.printStackTrace();
 	    }
+
+	    if (isConnectException) {
+	      return ConnectionException.CONNECT;
+	    }
+
+	    return ConnectionException.IO;
 	  }
 
 	  if (e instanceof MalformedURLException) {
 	    System.out.println(this.malformedURLExceptionMessage);
 	    e.printStackTrace();
 
-	    exceptions.add(ConnectionException.MALFORMED_URL);
+	    return ConnectionException.MALFORMED_URL;
 	  }
 
 	  if (e instanceof ProtocolException) {
 
-	    exceptions.add(ConnectionException.PROTOCOL);
+	    return ConnectionException.PROTOCOL;
 	  }
 
-    return exceptions;
+    return ConnectionException.EXCEPTION;
 	}
 
 	public enum ConnectionException {

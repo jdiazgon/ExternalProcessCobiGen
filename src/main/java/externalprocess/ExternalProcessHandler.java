@@ -117,7 +117,7 @@ public class ExternalProcessHandler {
       } catch (Exception e) {
           connectionExc.setConnectExceptionMessage("ConnectException: Connection to server failed, attempt number " + retry + ".");
           connectionExc.setIOExceptionMessage("IOException: Connection to server failed, attempt number " + retry + ".");
-          if(connectionExc.handle(e).contains(ConnectionException.MALFORMED_URL)) {
+          if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
             return false;
           }
 

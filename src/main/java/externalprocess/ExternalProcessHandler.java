@@ -222,6 +222,8 @@ public class ExternalProcessHandler {
       this.conn.setDoOutput(true);
       this.conn.setRequestMethod(httpMethod);
       this.conn.setRequestProperty(headerProperty, mediaType);
+      this.conn.setConnectTimeout(ProcessConstants.CONNECTION_TIMEOUT);
+      this.conn.setReadTimeout(ProcessConstants.CONNECTION_TIMEOUT);
 
     } catch (Exception e) {
       ConnectionExceptionHandler connectionExc = new ConnectionExceptionHandler();

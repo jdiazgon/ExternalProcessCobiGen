@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 
 import org.apache.commons.io.FileUtils;
@@ -89,7 +88,7 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingOverrides() {
 
-    // assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
     assertEquals(true, request.InitializeConnection());
 
     // arrange
@@ -125,7 +124,7 @@ public class TypeScriptMergerTest {
     assertThat(mergedContents).contains("private b: string;");
     // Next version should merge comments
     // assertThat(mergedContents).contains("// Should contain this comment");
-    // request.closeConnection();
+    request.closeConnection();
   }
 
   /**
@@ -136,7 +135,7 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingMassiveFile() {
 
-    // assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
+    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
     assertEquals(true, request.InitializeConnection());
 
     // arrange
@@ -146,30 +145,8 @@ public class TypeScriptMergerTest {
     String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
 
     assertEquals(false, mergedContents.contains("Not able to merge") || mergedContents.isEmpty());
+    request.closeConnection();
 
-  }
-
-  /**
-   * Creates a massive ts file
-   *
-   * @param fileName
-   * @return Massive string
-   * @throws FileNotFoundException
-   */
-  private String createMassiveFile(String fileName) throws FileNotFoundException {
-
-    String massiveString = readTSFile(fileName);
-    String generatedText = massiveString;
-
-    for (int i = 0; i < 35000; i++) {
-      String appendThis = generatedText.replaceAll("class a ", "class a" + i).replaceAll("interface a ",
-          "interface a" + i);
-      massiveString = massiveString + "\n" + appendThis;
-    }
-    try (PrintWriter out = new PrintWriter("massiveFile.txt")) {
-      out.println(massiveString);
-    }
-    return massiveString;
   }
 
   /**
@@ -184,6 +161,7 @@ public class TypeScriptMergerTest {
     File baseFile = new File(testFileRootPath + "baseFile_encoding_UTF-8.ts");
     File patchFile = new File(testFileRootPath + "patchFile.ts");
 
+    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
     assertEquals(true, request.InitializeConnection());
 
     String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, FileUtils.readFileToString(patchFile),
@@ -194,6 +172,7 @@ public class TypeScriptMergerTest {
     baseFile = new File(testFileRootPath + "baseFile_encoding_ISO-8859-1.ts");
     mergedContents = "";
     assertThat(mergedContents.contains("Ñ"));
+    request.closeConnection();
   }
 
   /**

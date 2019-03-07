@@ -108,8 +108,6 @@ public class ExternalProcessHandler {
     int retry = 0;
     while (!isConnected && retry < 10) {
       try {
-        retry++;
-
         startConnection();
 
         // Just check correct port acquisition
@@ -122,11 +120,13 @@ public class ExternalProcessHandler {
           }
 
       } catch (Exception e) {
-          connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number sdfsd" + retry + ".");
-          connectionExc.setIOExceptionMessage("Connection to server failed, attempt number fdsf" + retry + ".");
+          connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number " + retry + ".");
+          connectionExc.setIOExceptionMessage("Connection to server failed, attempt number " + retry + ".");
           if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
             return false;
           }
+
+          retry++;
 
       } finally {
         this.conn.disconnect();

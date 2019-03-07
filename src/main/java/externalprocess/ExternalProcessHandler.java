@@ -8,6 +8,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 import externalprocess.ConnectionExceptionHandler.ConnectionException;
+import externalprocess.constants.ProcessConstants;
 import externalprocess.utils.OutputHandler;
 
 /**
@@ -215,6 +216,7 @@ public class ExternalProcessHandler {
     try {
       URL currentURL = new URL(this.url.getProtocol(), this.url.getHost(), this.url.getPort(),
           this.url.getFile() + endpointURL);
+
       this.conn = (HttpURLConnection) currentURL.openConnection();
 
       this.conn.setDoOutput(true);
@@ -232,6 +234,9 @@ public class ExternalProcessHandler {
 
     if (this.conn != null) {
       this.conn.disconnect();
+    }
+    if (this.process == null) {
+      return;
     }
     if (this.process.isAlive()) {
       this.process.destroy();

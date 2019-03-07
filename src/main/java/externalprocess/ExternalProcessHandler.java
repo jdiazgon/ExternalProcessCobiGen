@@ -102,7 +102,7 @@ public class ExternalProcessHandler {
   public boolean InitializeConnection() {
 
     ConnectionExceptionHandler connectionExc = new ConnectionExceptionHandler();
-    connectionExc.setMalformedURLExceptionMessage("Connection to server failed, MalformedURL.");
+    connectionExc.setMalformedURLExceptionMessage("MalformedURLException: Connection to server failed, MalformedURL.");
 
     boolean isConnected = false;
     for (int retry = 0; !isConnected && retry < 10; retry++) {
@@ -115,9 +115,9 @@ public class ExternalProcessHandler {
         }
 
       } catch (Exception e) {
-          connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number " + retry + ".");
-          connectionExc.setIOExceptionMessage("Connection to server failed, attempt number " + retry + ".");
-          if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
+          connectionExc.setConnectExceptionMessage("ConnectException: Connection to server failed, attempt number " + retry + ".");
+          connectionExc.setIOExceptionMessage("IOException: Connection to server failed, attempt number " + retry + ".");
+          if(connectionExc.handle(e).contains(ConnectionException.MALFORMED_URL)) {
             return false;
           }
 

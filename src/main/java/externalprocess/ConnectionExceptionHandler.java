@@ -5,6 +5,8 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.time.chrono.IsoChronology;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ConnectionExceptionHandler {
 
@@ -65,17 +67,21 @@ public class ConnectionExceptionHandler {
 	}
 
 
-	public ConnectionException handle(Exception e) {
+	public List<ConnectionException> handle(Exception e) {
+
+	  List<ConnectionException> exceptions = new LinkedList<ConnectionException>();
 
 	  boolean isConnectException = e instanceof ConnectException;
 	  boolean isIOException = e instanceof IOException;
 
 	  if (isConnectException) {
 	    System.out.println(this.connectExceptionMessage);
+	    exceptions.add(ConnectionException.CONNECT);
 	  }
 
 	  if (isIOException) {
       System.out.println(this.ioExceptionMessage);
+      exceptions.add(ConnectionException.IO);
     }
 
 	  if (isConnectException || isIOException) {
@@ -84,27 +90,21 @@ public class ConnectionExceptionHandler {
 	    } catch (InterruptedException eS) {
 	      eS.printStackTrace();
 	    }
-
-	    if (isConnectException) {
-	      return ConnectionException.CONNECT;
-	    }
-
-	    return ConnectionException.IO;
 	  }
 
 	  if (e instanceof MalformedURLException) {
 	    System.out.println(this.malformedURLExceptionMessage);
 	    e.printStackTrace();
 
-	    return ConnectionException.MALFORMED_URL;
+	    exceptions.add(ConnectionException.MALFORMED_URL);
 	  }
 
 	  if (e instanceof ProtocolException) {
 
-	    return ConnectionException.PROTOCOL;
+	    exceptions.add(ConnectionException.PROTOCOL);
 	  }
 
-    return ConnectionException.EXCEPTION;
+    return exceptions;
 	}
 
 	public enum ConnectionException {

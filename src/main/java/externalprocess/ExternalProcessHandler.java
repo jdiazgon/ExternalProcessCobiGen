@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import externalprocess.constants.ProcessConstants;
 import externalprocess.utils.OutputHandler;
 
 /**
@@ -235,11 +236,15 @@ public class ExternalProcessHandler {
     try {
       URL currentURL = new URL(this.url.getProtocol(), this.url.getHost(), this.url.getPort(),
           this.url.getFile() + endpointURL);
+
       this.conn = (HttpURLConnection) currentURL.openConnection();
 
       this.conn.setDoOutput(true);
       this.conn.setRequestMethod(httpMethod);
       this.conn.setRequestProperty(headerProperty, mediaType);
+
+      this.conn.setConnectTimeout(ProcessConstants.CONNECTION_TIMEOUT);
+      this.conn.setReadTimeout(ProcessConstants.CONNECTION_TIMEOUT);
 
     } catch (ProtocolException e) {
       e.printStackTrace();
@@ -255,6 +260,9 @@ public class ExternalProcessHandler {
 
     if (this.conn != null) {
       this.conn.disconnect();
+    }
+    if (this.process == null) {
+      return;
     }
     if (this.process.isAlive()) {
       this.process.destroy();

@@ -26,8 +26,8 @@ import requestbodies.MergeTO;
  * @since 0.0.1
  */
 public class NodeMerger {
-  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-      ProcessConstants.port);
+  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME,
+      ProcessConstants.PORT);
 
   /** OS specific line separator */
   private static final String LINE_SEP = System.getProperty("line.separator");

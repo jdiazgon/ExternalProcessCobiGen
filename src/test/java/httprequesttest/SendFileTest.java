@@ -16,13 +16,13 @@ public class SendFileTest {
   @Test
   public void checkFileSentCorrectly() {
 
-    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-        ProcessConstants.port);
+    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME,
+        ProcessConstants.PORT);
     InputReader inputReader = new InputReader();
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    // assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
 
     assertEquals(request.InitializeConnection(), true);
     assertEquals(inputReader.isValidInput(inputFile), true);
@@ -33,12 +33,12 @@ public class SendFileTest {
   public void checkPortIsBlocked() {
 
     // Port 80 is always blocked, so let's try to check what happens
-    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName, 80);
+    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME, 80);
     InputReader inputReader = new InputReader();
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.executingExe(ProcessConstants.exePath), true);
+    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
 
     assertEquals(request.InitializeConnection(), true);
     assertEquals(inputReader.isValidInput(inputFile), true);

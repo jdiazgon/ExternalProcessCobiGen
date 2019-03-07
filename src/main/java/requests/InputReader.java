@@ -13,8 +13,8 @@ import externalprocess.constants.ProcessConstants;
 import requestbodies.InputFile;
 
 public class InputReader {
-  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-      ProcessConstants.port);
+  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME,
+      ProcessConstants.PORT);
 
   /**
    * @param inputFile

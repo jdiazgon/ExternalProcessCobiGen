@@ -30,7 +30,7 @@ public class TypeScriptMergerTest {
 
   /** Initializing connection with server */
   private static ExternalProcessHandler request = ExternalProcessHandler
-      .getExternalProcessHandler(ProcessConstants.hostName, ProcessConstants.port);
+      .getExternalProcessHandler(ProcessConstants.HOST_NAME, ProcessConstants.PORT);
 
   /**
    * Checks if the ts-merger can be launched and if the iutput is correct with patchOverrides = false
@@ -40,7 +40,7 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingNoOverrides() {
 
-    assertEquals(true, request.executingExe(ProcessConstants.exePath));
+    assertEquals(true, request.executingExe(ProcessConstants.EXE_PATH));
     assertEquals(true, request.InitializeConnection());
 
     // arrange
@@ -136,7 +136,7 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingMassiveFile() {
 
-    // assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    // assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
     assertEquals(true, request.InitializeConnection());
 
     // arrange
@@ -145,7 +145,7 @@ public class TypeScriptMergerTest {
     // act
     String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
 
-    assertEquals(false, mergedContents.isEmpty());
+    assertEquals(false, mergedContents.contains("Not able to merge") || mergedContents.isEmpty());
 
   }
 

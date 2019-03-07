@@ -1,9 +1,14 @@
 package externalprocess.constants;
 
 public final class ProcessConstants {
-  public static final String hostName = "localhost";
+  public static final String HOST_NAME = "localhost";
 
-  public static final int port = 5010;
+  public static final int PORT = 5010;
 
-  public static final String exePath = "..\\nestserver\\nestserver.exe\\";
+  public static final String EXE_PATH = "..\\nestserver\\nestserver.exe\\";
+
+  /**
+   * Connection timeout in milliseconds, so that requests don't get frozen
+   */
+  public static final int CONNECTION_TIMEOUT = 10000;
 }

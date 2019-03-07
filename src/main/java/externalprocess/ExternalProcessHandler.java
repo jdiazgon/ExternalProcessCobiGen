@@ -108,8 +108,6 @@ public class ExternalProcessHandler {
     int retry = 0;
     while (!isConnected && retry < 10) {
       try {
-        connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number " + (retry + 1) + ".");
-        connectionExc.setIOExceptionMessage("Connection to server failed, attempt number " + (retry + 1) + ".");
         retry++;
 
         startConnection();
@@ -124,6 +122,8 @@ public class ExternalProcessHandler {
           }
 
       } catch (Exception e) {
+          connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number sdfsd" + retry + ".");
+          connectionExc.setIOExceptionMessage("Connection to server failed, attempt number fdsf" + retry + ".");
           if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
             return false;
           }

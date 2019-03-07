@@ -105,19 +105,14 @@ public class ExternalProcessHandler {
     connectionExc.setMalformedURLExceptionMessage("Connection to server failed, MalformedURL.");
 
     boolean isConnected = false;
-    int retry = 0;
-    while (!isConnected && retry < 10) {
+    for (int retry = 0; !isConnected && retry < 10; retry++) {
       try {
         startConnection();
 
         // Just check correct port acquisition
-        while (!acquirePort())
-          if (retry <= 5) {
-            retry++;
-            startConnection();
-          } else {
-            return false;
-          }
+        if(acquirePort()) {
+          return true;
+        }
 
       } catch (Exception e) {
           connectionExc.setConnectExceptionMessage("Connection to server failed, attempt number " + retry + ".");
@@ -125,8 +120,6 @@ public class ExternalProcessHandler {
           if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
             return false;
           }
-
-          retry++;
 
       } finally {
         this.conn.disconnect();

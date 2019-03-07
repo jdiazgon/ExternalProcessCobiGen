@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.time.chrono.IsoChronology;
 
 public class ConnectionExceptionHandler {
 
@@ -11,11 +12,15 @@ public class ConnectionExceptionHandler {
 
 	private String malformedURLExceptionMessage;
 
-  private String IOExceptionMessage;
+  private String ioExceptionMessage;
 
   private String protocolExceptionMessage;
 
   public ConnectionExceptionHandler() {
+    this.connectExceptionMessage = "";
+    this.malformedURLExceptionMessage = "";
+    this.ioExceptionMessage = "";
+    this.protocolExceptionMessage = "";
 
   }
 
@@ -40,11 +45,11 @@ public class ConnectionExceptionHandler {
 	}
 
 	public String getIOExceptionMessage() {
-		return IOExceptionMessage;
+		return ioExceptionMessage;
 	}
 
-	public ConnectionExceptionHandler setIOExceptionMessage(String iOExceptionMessage) {
-		IOExceptionMessage = iOExceptionMessage;
+	public ConnectionExceptionHandler setIOExceptionMessage(String ioExceptionMessage) {
+		this.ioExceptionMessage = ioExceptionMessage;
 
 		return this;
 	}
@@ -60,30 +65,53 @@ public class ConnectionExceptionHandler {
 	}
 
 
-	public void handle(ConnectException e) {
-		System.out.println(this.connectExceptionMessage);
+	public ConnectionException handle(Exception e) {
 
-    try {
-      Thread.sleep(100);
-    } catch (InterruptedException eS) {
-      eS.printStackTrace();
+	  boolean isConnectException = e instanceof ConnectException;
+	  boolean isIOException = e instanceof IOException;
+
+	  if (isConnectException) {
+	    System.out.println(this.connectExceptionMessage);
+	  }
+
+	  if (isIOException) {
+      System.out.println(this.ioExceptionMessage);
     }
+
+	  if (isConnectException || isIOException) {
+	    try {
+	      Thread.sleep(100);
+	    } catch (InterruptedException eS) {
+	      eS.printStackTrace();
+	    }
+
+	    if (isConnectException) {
+	      return ConnectionException.CONNECT;
+	    }
+
+	    return ConnectionException.IO;
+	  }
+
+	  if (e instanceof MalformedURLException) {
+	    System.out.println(this.malformedURLExceptionMessage);
+	    e.printStackTrace();
+
+	    return ConnectionException.MALFORMED_URL;
+	  }
+
+	  if (e instanceof ProtocolException) {
+
+	    return ConnectionException.PROTOCOL;
+	  }
+
+    return ConnectionException.EXCEPTION;
 	}
 
-	public void handle(MalformedURLException e) {
-	  System.out.println(this.malformedURLExceptionMessage);
-	  e.printStackTrace();
-	}
-
-	public void handle(IOException e) {
-	  try {
-      Thread.sleep(100);
-    } catch (InterruptedException eS) {
-      eS.printStackTrace();
-    }
-	}
-
-	public void handle(ProtocolException e) {
-
+	public enum ConnectionException {
+	  CONNECT,
+	  MALFORMED_URL,
+	  IO,
+	  PROTOCOL,
+	  EXCEPTION;
 	}
 }

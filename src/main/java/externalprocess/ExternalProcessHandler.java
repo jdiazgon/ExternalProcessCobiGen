@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import externalprocess.ConnectionExceptionHandler.ConnectionException;
 import externalprocess.utils.OutputHandler;
 
 /**
@@ -122,15 +123,10 @@ public class ExternalProcessHandler {
             return false;
           }
 
-      } catch (ConnectException e) {
-          connectionExc.handle(e);
-
-      } catch (MalformedURLException e) {
-          connectionExc.handle(e);
-          return false;
-
-      } catch (IOException e) {
-          connectionExc.handle(e);
+      } catch (Exception e) {
+          if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
+            return false;
+          }
 
       } finally {
         this.conn.disconnect();
@@ -223,7 +219,6 @@ public class ExternalProcessHandler {
    */
   public HttpURLConnection getConnection(String httpMethod, String headerProperty, String mediaType,
       String endpointURL) {
-
     try {
       URL currentURL = new URL(this.url.getProtocol(), this.url.getHost(), this.url.getPort(),
           this.url.getFile() + endpointURL);
@@ -233,12 +228,9 @@ public class ExternalProcessHandler {
       this.conn.setRequestMethod(httpMethod);
       this.conn.setRequestProperty(headerProperty, mediaType);
 
-    } catch (ProtocolException e) {
-      e.printStackTrace();
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      ConnectionExceptionHandler connectionExc = new ConnectionExceptionHandler();
+      connectionExc.handle(e);
     }
     return this.conn;
   }

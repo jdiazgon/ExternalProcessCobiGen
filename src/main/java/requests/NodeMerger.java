@@ -119,7 +119,7 @@ public class NodeMerger {
 
       System.out.println("Closing connection on InputReader.");
       System.out.println(e);
-      this.request.closeConnection();
+      this.request.terminateProcessConnection();
       e.printStackTrace();
     }
     return "Not able to merge";

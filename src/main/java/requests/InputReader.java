@@ -56,7 +56,7 @@ public class InputReader {
 
       System.out.println("Closing connection on InputReader.");
       System.out.println(e);
-      this.request.closeConnection();
+      this.request.terminateProcessConnection();
       e.printStackTrace();
     }
     return false;

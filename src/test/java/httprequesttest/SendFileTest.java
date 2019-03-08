@@ -22,11 +22,14 @@ public class SendFileTest {
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
+    try {
+      assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
 
-    assertEquals(request.InitializeConnection(), true);
-    assertEquals(inputReader.isValidInput(inputFile), true);
-    request.closeConnection();
+      assertEquals(request.initializeConnection(), true);
+      assertEquals(inputReader.isValidInput(inputFile), true);
+    } finally {
+      request.terminateProcessConnection();
+    }
   }
 
   @Test
@@ -38,11 +41,15 @@ public class SendFileTest {
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
+    try {
 
-    assertEquals(request.InitializeConnection(), true);
-    assertEquals(inputReader.isValidInput(inputFile), true);
-    request.closeConnection();
+      request.executingExe(ProcessConstants.EXE_PATH);
+
+      assertEquals(request.initializeConnection(), true);
+      assertEquals(inputReader.isValidInput(inputFile), true);
+    } finally {
+      request.terminateProcessConnection();
+    }
   }
 
 }

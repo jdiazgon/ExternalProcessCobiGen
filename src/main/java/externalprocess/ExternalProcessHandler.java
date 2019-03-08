@@ -1,10 +1,8 @@
 package externalprocess;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 import externalprocess.ConnectionExceptionHandler.ConnectionException;
@@ -83,8 +81,17 @@ public class ExternalProcessHandler {
       // We try to get the error output
       this.errorHandler = new OutputHandler(this.process.getErrorStream(), "UTF-8");
 
-      while (!this.process.isAlive()) {
+      int retry = 0;
+      while (!this.process.isAlive() && retry <= 10) {
+        if (processHasErrors()) {
+          terminateProcessConnection();
+          return false;
+        }
+        retry++;
         System.out.println("Waiting process is alive");
+      }
+      if (retry > 10) {
+        return false;
       }
       execution = true;
     } catch (IOException e) {
@@ -97,37 +104,37 @@ public class ExternalProcessHandler {
 
   /**
    * Tries several times to start a new connection to the server. If the port is already in use, tries to connect again
+   * with another port
    *
    * @return true if the ExternalProcess was able to connect to the server
    */
-  public boolean InitializeConnection() {
+  public boolean initializeConnection() {
 
     ConnectionExceptionHandler connectionExc = new ConnectionExceptionHandler();
     connectionExc.setMalformedURLExceptionMessage("MalformedURLException: Connection to server failed, MalformedURL.");
 
-    boolean isConnected = false;
-    for (int retry = 0; !isConnected && retry < 10; retry++) {
+    for (int retry = 0; retry < 10; retry++) {
       try {
         startConnection();
 
         // Just check correct port acquisition
-        if(acquirePort()) {
+        if (acquirePort()) {
           return true;
         }
-
       } catch (Exception e) {
-          connectionExc.setConnectExceptionMessage("ConnectException: Connection to server failed, attempt number " + retry + ".");
-          connectionExc.setIOExceptionMessage("IOException: Connection to server failed, attempt number " + retry + ".");
-          if(connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
-            return false;
-          }
+        connectionExc
+            .setConnectExceptionMessage("ConnectException: Connection to server failed, attempt number " + retry + ".");
+        connectionExc.setIOExceptionMessage("IOException: Connection to server failed, attempt number " + retry + ".");
+
+        if (connectionExc.handle(e).equals(ConnectionException.MALFORMED_URL)) {
+          return false;
+        }
 
       } finally {
         this.conn.disconnect();
-        isConnected = true;
       }
     }
-    return isConnected;
+    return false;
   }
 
   /**
@@ -152,9 +159,8 @@ public class ExternalProcessHandler {
   public boolean acquirePort() {
 
     // If there is any error, probably it is because the port is blocked
-    // dev processHasErrors() ||
-    if (isNotConnected()) {
-      closeConnection();
+    if (isNotConnected() || processHasErrors()) {
+      terminateProcessConnection();
       this.port++;
       executingExe(this.exePath);
     } else {
@@ -213,6 +219,7 @@ public class ExternalProcessHandler {
    */
   public HttpURLConnection getConnection(String httpMethod, String headerProperty, String mediaType,
       String endpointURL) {
+
     try {
       URL currentURL = new URL(this.url.getProtocol(), this.url.getHost(), this.url.getPort(),
           this.url.getFile() + endpointURL);
@@ -232,7 +239,7 @@ public class ExternalProcessHandler {
     return this.conn;
   }
 
-  public void closeConnection() {
+  public void terminateProcessConnection() {
 
     if (this.conn != null) {
       this.conn.disconnect();

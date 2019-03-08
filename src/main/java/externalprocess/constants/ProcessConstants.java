@@ -3,7 +3,7 @@ package externalprocess.constants;
 public final class ProcessConstants {
   public static final String HOST_NAME = "localhost";
 
-  public static final int PORT = 5010;
+  public static final int PORT = 5000;
 
   public static final String EXE_PATH = "..\\nestserver\\nestserver.exe\\";
 

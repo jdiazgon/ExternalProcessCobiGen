@@ -39,45 +39,49 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingNoOverrides() {
 
-    assertEquals(true, request.executingExe(ProcessConstants.EXE_PATH));
-    assertEquals(true, request.InitializeConnection());
+    try {
 
-    // arrange
-    File baseFile = new File(testFileRootPath + "baseFile.ts");
+      assertEquals(true, request.executingExe(ProcessConstants.EXE_PATH));
+      assertEquals(true, request.initializeConnection());
 
-    // Next version should merge comments
-    // String regex = " * Should format correctly this line";
+      // arrange
+      File baseFile = new File(testFileRootPath + "baseFile.ts");
 
-    // act
-    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
+      // Next version should merge comments
+      // String regex = " * Should format correctly this line";
 
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("aProperty: number = 2");
-    assertThat(mergedContents).contains("bMethod");
-    assertThat(mergedContents).contains("aMethod");
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("import { c, f } from 'd'");
-    assertThat(mergedContents).contains("import { a, e } from 'b'");
-    assertThat(mergedContents).contains("export { e, g } from 'f';");
-    assertThat(mergedContents).contains("export interface a {");
-    assertThat(mergedContents).contains("private b: number;");
-    // assertThat(mergedContents).containsPattern(regex);
+      // act
+      String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
 
-    mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "ISO-8859-1");
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("aProperty: number = 2");
+      assertThat(mergedContents).contains("bMethod");
+      assertThat(mergedContents).contains("aMethod");
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("import { c, f } from 'd'");
+      assertThat(mergedContents).contains("import { a, e } from 'b'");
+      assertThat(mergedContents).contains("export { e, g } from 'f';");
+      assertThat(mergedContents).contains("export interface a {");
+      assertThat(mergedContents).contains("private b: number;");
+      // assertThat(mergedContents).containsPattern(regex);
 
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("aProperty: number = 2");
-    assertThat(mergedContents).contains("bMethod");
-    assertThat(mergedContents).contains("aMethod");
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("import { c, f } from 'd'");
-    assertThat(mergedContents).contains("import { a, e } from 'b'");
-    assertThat(mergedContents).contains("export { e, g } from 'f';");
-    assertThat(mergedContents).contains("export interface a {");
-    assertThat(mergedContents).contains("private b: number;");
-    // assertThat(mergedContents).containsPattern(regex);
+      mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "ISO-8859-1");
 
-    request.closeConnection();
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("aProperty: number = 2");
+      assertThat(mergedContents).contains("bMethod");
+      assertThat(mergedContents).contains("aMethod");
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("import { c, f } from 'd'");
+      assertThat(mergedContents).contains("import { a, e } from 'b'");
+      assertThat(mergedContents).contains("export { e, g } from 'f';");
+      assertThat(mergedContents).contains("export interface a {");
+      assertThat(mergedContents).contains("private b: number;");
+      // assertThat(mergedContents).containsPattern(regex);
+    } finally {
+
+      request.terminateProcessConnection();
+    }
   }
 
   /**
@@ -88,43 +92,47 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingOverrides() {
 
-    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
-    assertEquals(true, request.InitializeConnection());
+    try {
 
-    // arrange
-    File baseFile = new File(testFileRootPath + "baseFile.ts");
+      assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
+      assertEquals(true, request.initializeConnection());
 
-    // act
-    String mergedContents = new NodeMerger("tsmerge", true).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
+      // arrange
+      File baseFile = new File(testFileRootPath + "baseFile.ts");
 
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("aProperty: number = 3");
-    assertThat(mergedContents).contains("bMethod");
-    assertThat(mergedContents).contains("aMethod");
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("import { c, f } from 'd'");
-    assertThat(mergedContents).contains("import { a, e } from 'b'");
-    assertThat(mergedContents).contains("export { e, g } from 'f';");
-    assertThat(mergedContents).contains("interface a {");
-    assertThat(mergedContents).contains("private b: string;");
-    // Next version should merge comments
-    // assertThat(mergedContents).contains("// Should contain this comment");
+      // act
+      String mergedContents = new NodeMerger("tsmerge", true).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
 
-    mergedContents = new NodeMerger("tsmerge", true).merge(baseFile, readTSFile("patchFile.ts"), "ISO-8859-1");
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("aProperty: number = 3");
+      assertThat(mergedContents).contains("bMethod");
+      assertThat(mergedContents).contains("aMethod");
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("import { c, f } from 'd'");
+      assertThat(mergedContents).contains("import { a, e } from 'b'");
+      assertThat(mergedContents).contains("export { e, g } from 'f';");
+      assertThat(mergedContents).contains("interface a {");
+      assertThat(mergedContents).contains("private b: string;");
+      // Next version should merge comments
+      // assertThat(mergedContents).contains("// Should contain this comment");
 
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("aProperty: number = 3");
-    assertThat(mergedContents).contains("bMethod");
-    assertThat(mergedContents).contains("aMethod");
-    assertThat(mergedContents).contains("bProperty");
-    assertThat(mergedContents).contains("import { c, f } from 'd'");
-    assertThat(mergedContents).contains("import { a, e } from 'b'");
-    assertThat(mergedContents).contains("export { e, g } from 'f';");
-    assertThat(mergedContents).contains("interface a {");
-    assertThat(mergedContents).contains("private b: string;");
-    // Next version should merge comments
-    // assertThat(mergedContents).contains("// Should contain this comment");
-    request.closeConnection();
+      mergedContents = new NodeMerger("tsmerge", true).merge(baseFile, readTSFile("patchFile.ts"), "ISO-8859-1");
+
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("aProperty: number = 3");
+      assertThat(mergedContents).contains("bMethod");
+      assertThat(mergedContents).contains("aMethod");
+      assertThat(mergedContents).contains("bProperty");
+      assertThat(mergedContents).contains("import { c, f } from 'd'");
+      assertThat(mergedContents).contains("import { a, e } from 'b'");
+      assertThat(mergedContents).contains("export { e, g } from 'f';");
+      assertThat(mergedContents).contains("interface a {");
+      assertThat(mergedContents).contains("private b: string;");
+      // Next version should merge comments
+      // assertThat(mergedContents).contains("// Should contain this comment");
+    } finally {
+      request.terminateProcessConnection();
+    }
   }
 
   /**
@@ -135,17 +143,21 @@ public class TypeScriptMergerTest {
   @Test
   public void testMergingMassiveFile() {
 
-    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
-    assertEquals(true, request.InitializeConnection());
+    try {
 
-    // arrange
-    File baseFile = new File(testFileRootPath + "massiveFile.ts");
+      assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
+      assertEquals(true, request.initializeConnection());
 
-    // act
-    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
+      // arrange
+      File baseFile = new File(testFileRootPath + "massiveFile.ts");
 
-    assertEquals(false, mergedContents.contains("Not able to merge") || mergedContents.isEmpty());
-    request.closeConnection();
+      // act
+      String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, readTSFile("patchFile.ts"), "UTF-8");
+
+      assertEquals(false, mergedContents.contains("Not able to merge") || mergedContents.isEmpty());
+    } finally {
+      request.terminateProcessConnection();
+    }
 
   }
 
@@ -161,18 +173,22 @@ public class TypeScriptMergerTest {
     File baseFile = new File(testFileRootPath + "baseFile_encoding_UTF-8.ts");
     File patchFile = new File(testFileRootPath + "patchFile.ts");
 
-    assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
-    assertEquals(true, request.InitializeConnection());
+    try {
 
-    String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, FileUtils.readFileToString(patchFile),
-        "UTF-8");
+      assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
+      assertEquals(true, request.initializeConnection());
 
-    assertThat(mergedContents.contains("Ñ")).isTrue();
+      String mergedContents = new NodeMerger("tsmerge", false).merge(baseFile, FileUtils.readFileToString(patchFile),
+          "UTF-8");
 
-    baseFile = new File(testFileRootPath + "baseFile_encoding_ISO-8859-1.ts");
-    mergedContents = "";
-    assertThat(mergedContents.contains("Ñ"));
-    request.closeConnection();
+      assertThat(mergedContents.contains("Ñ")).isTrue();
+
+      baseFile = new File(testFileRootPath + "baseFile_encoding_ISO-8859-1.ts");
+      mergedContents = "";
+      assertThat(mergedContents.contains("Ñ"));
+    } finally {
+      request.terminateProcessConnection();
+    }
   }
 
   /**

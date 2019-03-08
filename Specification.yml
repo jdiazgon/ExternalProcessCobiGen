@@ -238,12 +238,13 @@ components:
           description: Merger properties
           type: object
           properties:
-            basePath:
+            baseContent:
               type: string
-            patchPath:
+            patchContent:
               type: string
-            targetCharset:
-              type: string
+            patchOverrides:
+              type: boolean
+
 
     requestBodies:
         Model:

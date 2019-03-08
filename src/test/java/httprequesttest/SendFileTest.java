@@ -7,7 +7,7 @@ import java.io.File;
 import org.junit.Test;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
+import externalprocess.constants.ProcessConstants;
 import requestbodies.InputFile;
 import requests.InputReader;
 
@@ -16,33 +16,40 @@ public class SendFileTest {
   @Test
   public void checkFileSentCorrectly() {
 
-    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-        ProcessConstants.port);
+    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME,
+        ProcessConstants.PORT);
     InputReader inputReader = new InputReader();
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    try {
+      assertEquals(request.executingExe(ProcessConstants.EXE_PATH), true);
 
-    assertEquals(request.InitializeConnection(), true);
-    assertEquals(inputReader.isValidInput(inputFile), true);
-    request.closeConnection();
+      assertEquals(request.initializeConnection(), true);
+      assertEquals(inputReader.isValidInput(inputFile), true);
+    } finally {
+      request.terminateProcessConnection();
+    }
   }
 
   @Test
   public void checkPortIsBlocked() {
 
     // Port 80 is always blocked, so let's try to check what happens
-    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName, 80);
+    ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME, 80);
     InputReader inputReader = new InputReader();
     String filePath = "C:\\" + File.separator + "Users\\" + File.separator + "whatever.nest";
     InputFile inputFile = new InputFile(filePath);
 
-    assertEquals(request.ExecutinExe(ProcessConstants.exePath), true);
+    try {
 
-    assertEquals(request.InitializeConnection(), true);
-    assertEquals(inputReader.isValidInput(inputFile), true);
-    request.closeConnection();
+      request.executingExe(ProcessConstants.EXE_PATH);
+
+      assertEquals(request.initializeConnection(), true);
+      assertEquals(inputReader.isValidInput(inputFile), true);
+    } finally {
+      request.terminateProcessConnection();
+    }
   }
 
 }

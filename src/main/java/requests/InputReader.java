@@ -9,12 +9,12 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
+import externalprocess.constants.ProcessConstants;
 import requestbodies.InputFile;
 
 public class InputReader {
-  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-      ProcessConstants.port);
+  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME,
+      ProcessConstants.PORT);
 
   /**
    * @param inputFile
@@ -22,7 +22,7 @@ public class InputReader {
    */
   public boolean isValidInput(InputFile inputFile) {
 
-    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json");
+    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json", "isValidInput");
     try {
       OutputStream os = conn.getOutputStream();
       OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
@@ -56,7 +56,7 @@ public class InputReader {
 
       System.out.println("Closing connection on InputReader.");
       System.out.println(e);
-      this.request.closeConnection();
+      this.request.terminateProcessConnection();
       e.printStackTrace();
     }
     return false;

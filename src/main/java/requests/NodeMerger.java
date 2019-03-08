@@ -8,10 +8,17 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
+
+import com.devonfw.cobigen.api.exception.MergeException;
 
 import externalprocess.ExternalProcessHandler;
-import externalprocess.ProcessConstants;
-import requestbodies.InputFile;
+import externalprocess.constants.ProcessConstants;
+import requestbodies.MergeTO;
 
 /**
  * Merger class
@@ -19,13 +26,11 @@ import requestbodies.InputFile;
  * @since 0.0.1
  */
 public class NodeMerger {
-  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.hostName,
-      ProcessConstants.port);
+  ExternalProcessHandler request = ExternalProcessHandler.getExternalProcessHandler(ProcessConstants.HOST_NAME,
+      ProcessConstants.PORT);
 
   /** OS specific line separator */
   private static final String LINE_SEP = System.getProperty("line.separator");
-
-  private static final String QUOTES = "\"";
 
   /** Merger Type to be registered */
   private String type;
@@ -55,20 +60,30 @@ public class NodeMerger {
    * @param inputFile
    * @return
    */
-  public String merge(File base, String patchPath, String targetCharset) {
+  public String merge(File base, String patch, String targetCharset) {
 
-    InputFile baseFile = new InputFile(base.getAbsolutePath());
-    InputFile patchFile = new InputFile(patchPath);
-
-    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json");
+    String baseFileContents;
     try {
-      OutputStream os = conn.getOutputStream();
-      OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
-      osw.write("{ " + QUOTES + "basePath" + QUOTES + ": " + QUOTES + baseFile.getPath() + QUOTES + ",\n");
-      osw.write(QUOTES + "patchPath" + QUOTES + ": " + QUOTES + patchFile.getPath() + QUOTES + ",\n");
-      osw.write(QUOTES + "targetCharset" + QUOTES + ":" + QUOTES + targetCharset + QUOTES + "}");
+      baseFileContents = new String(Files.readAllBytes(base.toPath()), Charset.forName(targetCharset));
+    } catch (IOException e) {
+      throw new MergeException(base, "Could not read base file!", e);
+    }
+
+    MergeTO mergeTO = new MergeTO(baseFileContents, patch, this.patchOverrides);
+
+    HttpURLConnection conn = this.request.getConnection("POST", "Content-Type", "application/json", "merge");
+    // Used for sending serialized objects
+    ObjectWriter objWriter;
+    try (OutputStream os = conn.getOutputStream(); OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");) {
+
+      objWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+      String jsonMergerTO = objWriter.writeValueAsString(mergeTO);
+
+      // We need to escape new lines because otherwise our JSON gets corrupted
+      jsonMergerTO = jsonMergerTO.replace("\\n", "\\\\n");
+
+      osw.write(jsonMergerTO);
       osw.flush();
-      osw.close();
       os.close();
       conn.connect();
 
@@ -78,12 +93,20 @@ public class NodeMerger {
 
       BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-      String output;
+      String output = "";
+      String mergedContents = "";
       System.out.println("Output from Server .... \n");
-      while ((output = br.readLine()) != null) {
+      Boolean moreOutput = true;
+      Integer lineIteration = 0;
+      while ((output = br.readLine()) != null && moreOutput) {
         System.out.println(output);
-        return output;
+        mergedContents = mergedContents + "\n" + output;
+        lineIteration += 1;
+        if (lineIteration > 50) {
+          moreOutput = false;
+        }
       }
+      return mergedContents;
 
     } catch (ConnectException e) {
 
@@ -96,7 +119,7 @@ public class NodeMerger {
 
       System.out.println("Closing connection on InputReader.");
       System.out.println(e);
-      this.request.closeConnection();
+      this.request.terminateProcessConnection();
       e.printStackTrace();
     }
     return "Not able to merge";
